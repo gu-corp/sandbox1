@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-# Verify metadata/genesis.ssz against the live beacon node, and check that
-# metadata/config.yaml agrees with the config that node is actually running.
-#
-# genesis.ssz matters more than its size suggests: genesis_validators_root feeds
-# ForkDigest, which names every gossip topic. A consensus client with the wrong
-# one cannot join the network at all.
+# Verify metadata/genesis.ssz and metadata/config.yaml against the live beacon
+# node. genesis_validators_root feeds ForkDigest, which names every gossip
+# topic, so a wrong one keeps a client off the network entirely.
 #
 # Requires: curl, python3.
 set -euo pipefail
@@ -26,8 +23,8 @@ fi
 
 note "beacon api" "$BEACON_API"
 
-# Pull the node's own view of genesis. If the endpoint is down we skip rather
-# than fail: the file is immutable, an unreachable node says nothing about it.
+# If the endpoint is down, skip rather than fail: the file is immutable, and an
+# unreachable node says nothing about it.
 live="$(curl -sS -m 20 "$BEACON_API/eth/v1/beacon/genesis" 2>/dev/null || true)"
 spec="$(curl -sS -m 20 "$BEACON_API/eth/v1/config/spec" 2>/dev/null || true)"
 forks="$(curl -sS -m 20 "$BEACON_API/eth/v1/config/fork_schedule" 2>/dev/null || true)"

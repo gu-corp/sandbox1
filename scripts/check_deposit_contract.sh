@@ -49,9 +49,8 @@ else
   ok "deposit contract deployed at $addr ($size bytes)"
 fi
 
-# The deployment block must be a real block, and its hash must be the one
-# recorded next to it. This is the block a consensus client starts its eth1
-# deposit scan from, so a wrong value here means missed deposits.
+# A consensus client starts its eth1 deposit scan here, so a wrong block or
+# hash means missed deposits.
 blk_file="$META/deposit_contract_block.txt"
 hash_file="$META/deposit_contract_block_hash.txt"
 if [ -f "$blk_file" ] && [ -f "$hash_file" ]; then
@@ -68,8 +67,7 @@ if [ -f "$blk_file" ] && [ -f "$hash_file" ]; then
     bad "block $dep_block hashes to $live_blk, deposit_contract_block_hash.txt says $dep_hash"
   fi
 
-  # The contract cannot predate the block it was deployed in: the first deposit
-  # log has to land at or after it.
+  # Deposits cannot predate the deployment block.
   topic=0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5
   first_dep="$(rpc_call "$rpc" eth_getLogs \
     "[{\"address\":\"$addr\",\"topics\":[\"$topic\"],\"fromBlock\":\"$blk_hex\",\"toBlock\":\"latest\"}]" \
