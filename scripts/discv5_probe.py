@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
-"""Prove a discv5 node is alive, by making it answer.
+"""Prove a discv5 node is alive by making it answer.
 
-A TCP connect says a port is open. Discovery runs over UDP, where a connect
-proves nothing -- there is no handshake, so `nc -zu` reports success against a
-black hole. This sends a real discv5 v5.1 packet instead.
-
-The trick is that the masking key of a discv5 packet is the *recipient's* node
-id, which is keccak256 of its uncompressed public key -- and that key is in the
-ENR. So a packet masked with the id derived from the ENR can only be unmasked
-by a node that agrees its id is that. Send an ordinary message from an unknown
-source id and the node must reply WHOAREYOU. Getting that reply back binds the
-ENR's public key to whatever is actually listening at that address.
+Discovery runs over UDP, where a connect proves nothing: there is no handshake,
+so `nc -zu` reports success against a black hole. This sends a real discv5 v5.1
+packet instead. Its masking key is the *recipient's* node id, keccak256 of the
+public key in the ENR, so only a node that agrees its id is that can unmask the
+packet -- and it must reply WHOAREYOU. That reply binds the key in the record to
+whatever is listening.
 
 Usage: discv5_probe.py <ip> <udp-port> <compressed-secp256k1-pubkey-hex>
 Exit:  0 alive, 2 no answer, 3 answer was not discv5.
 
-Pure standard library on purpose: this runs in CI, and pulling a crypto
-dependency in to send one packet is not worth it. Keccak-256 and AES-128-CTR
-are implemented below; neither handles secrets, both only mask a public value.
+Keccak-256 and AES-128-CTR are implemented below rather than pulled in: this
+sends one packet in CI, and neither touches a secret here.
 """
 import os
 import socket

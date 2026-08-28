@@ -40,35 +40,29 @@ forks:
   london: 17553835      # independently measured: first block carrying
                         # baseFeePerGas; 17553834 has none, 17553835 has 0x3b9aca00
 
-# The merge. Total difficulty is frozen at the terminal value; every block from
-# 31418732 on carries difficulty 0.
+# Total difficulty is frozen at the terminal value; every later block has 0.
 merge:
   terminal_total_difficulty: 60103838
   terminal_pow_block: 31418731   # difficulty 2, totalDifficulty 0x3951c9e
   first_pos_block: 31418732      # 2026-08-27T15:46:33Z, difficulty 0x0
 
-# Post-merge forks activate on timestamp, not block number. Each one is the
-# execution-layer counterpart of a consensus-layer fork epoch in ./config.yaml;
-# the two must agree or the layers split. PRESET_BASE is gnosis, so an epoch is
-# 16 * 5 = 80s and beacon genesis is 1787676703.
+# Post-merge forks activate on timestamp. Each is the execution-layer twin of a
+# fork epoch in ./config.yaml and must agree with it, or the layers split.
+# Epoch = 80s (gnosis preset), beacon genesis 1787676703.
 timestamp_forks:
-  shanghai: 1787848783  # 2026-08-27T16:39:43Z — CAPELLA_FORK_EPOCH 2151.
-                        # Measured: block 31419366, first with withdrawalsRoot.
-  cancun: 1787883023    # 2026-08-28T02:10:23Z — DENEB_FORK_EPOCH 2579.
-                        # Confirmed live: KZG precompile and blobSchedule active.
-  prague: 1787884303    # 2026-08-28T02:31:43Z — ELECTRA_FORK_EPOCH 2595.
-                        # Activated; forkId 0xb22f09bb, Electra system
-                        # contracts live and blocks carry requestsHash.
+  shanghai: 1787848783  # 2026-08-27T16:39:43Z, CAPELLA_FORK_EPOCH 2151
+  cancun: 1787883023    # 2026-08-28T02:10:23Z, DENEB_FORK_EPOCH 2579
+  prague: 1787884303    # 2026-08-28T02:31:43Z, ELECTRA_FORK_EPOCH 2595
 
-blob_schedule:          # applies from cancun; prague repeats the same values
+blob_schedule:          # from cancun; prague repeats it
   target: 1
   max: 2
   base_fee_update_fraction: 1112826
 
 deposit_contract_address: 0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2
-deposit_contract_block: 31377725   # 2026-08-25T06:49:18Z, tx 0x070517ae…c58d.
-                                   # Created by an internal CREATE from factory
-                                   # 0x0a0fb3f2…bc34 at nonce 3; see README.
+deposit_contract_block: 31377725   # 2026-08-25T06:49:18Z, tx 0x070517ae…c58d;
+                                   # internal CREATE from factory 0x0a0fb3f2…bc34
+                                   # at nonce 3. See README.
 deposit_contract_block_hash: 0xb169eee3a1869f34b30e9b40d7c7a22879c35d7d21e9d4d1b7592f380e05ff51
 
 # Genesis allocation

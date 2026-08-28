@@ -2,13 +2,10 @@
 # sandbox1 consensus-layer (beacon chain) configuration.
 #
 # Unlike the joc/joct drafts (gu-corp/joc-network-configs pos-migration/),
-# the values here are real: the
-# deposit contract below is deployed on sandbox1 and the fork epochs are set.
+# these values are real: the deposit contract is deployed and the forks are set.
 #
-# The beacon chain is live and the merge is done: the deposit contract holds 6
-# deposits (>= MIN_GENESIS_ACTIVE_VALIDATOR_COUNT of 5) and the execution layer
-# crossed TERMINAL_TOTAL_DIFFICULTY at block 31418731 on 2026-08-27T15:46:33Z.
-# Block 31418732 is the first PoS block — see the repo README.
+# Live and merged; forks through Electra are active. The README carries the
+# schedule and how each value was checked against the network.
 #
 # The execution-layer counterpart lives in ./genesis.json.
 # =====================================================================
@@ -25,8 +22,8 @@ CONFIG_NAME: 'sandbox1'
 
 # Transition
 # ---------------------------------------------------------------
-# Reached. This is the exact total difficulty of terminal PoW block 31418731;
-# block 31418732 (2026-08-27T15:46:33Z) is the first PoS block.
+# Reached: total difficulty of terminal PoW block 31418731. 31418732 is the
+# first PoS block.
 TERMINAL_TOTAL_DIFFICULTY: 60103838
 # By default, don't use these params
 TERMINAL_BLOCK_HASH: 0x0000000000000000000000000000000000000000000000000000000000000000
@@ -47,10 +44,8 @@ GENESIS_DELAY: 6000
 
 # Forking
 # ---------------------------------------------------------------
-# Fork epochs are in units of 16 slots: PRESET_BASE gnosis sets SLOTS_PER_EPOCH
-# to 16, so one epoch is 16 * SECONDS_PER_SLOT = 80s, not 384s. Beacon genesis
-# was 1787676703 (2026-08-25T16:51:43Z) = the timestamp of the eth1 block
-# holding the 5th deposit, plus GENESIS_DELAY.
+# PRESET_BASE gnosis means SLOTS_PER_EPOCH 16, so an epoch is 80s, not 384s.
+# Beacon genesis 1787676703 = eth1 block of the 5th deposit + GENESIS_DELAY.
 #
 # Fulu and later are disabled for now:
 #  - These may be re-assigned to another fork-version later
@@ -62,18 +57,13 @@ ALTAIR_FORK_EPOCH: 5
 # Bellatrix
 BELLATRIX_FORK_VERSION: 0x02000539
 BELLATRIX_FORK_EPOCH: 10
-# Capella
-# 2026-08-27T16:39:43Z — activated; matches shanghaiTime on the execution layer
-# (block 31419366, the first block carrying withdrawalsRoot).
+# Capella — 2026-08-27T16:39:43Z, = shanghaiTime (EL block 31419366)
 CAPELLA_FORK_VERSION: 0x03000539
 CAPELLA_FORK_EPOCH: 2151
-# Deneb
-# 2026-08-28T02:10:23Z — matches cancunTime on the execution layer.
+# Deneb — 2026-08-28T02:10:23Z, = cancunTime
 DENEB_FORK_VERSION: 0x04000539
 DENEB_FORK_EPOCH: 2579
-# Electra
-# 2026-08-28T02:31:43Z — activated; matches pragueTime on the execution layer
-# (forkId 0xb22f09bb, Electra system contracts live).
+# Electra — 2026-08-28T02:31:43Z, = pragueTime
 ELECTRA_FORK_VERSION: 0x05000539
 ELECTRA_FORK_EPOCH: 2595
 # Fulu

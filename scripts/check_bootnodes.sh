@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
-# Check the bootnodes this repo publishes:
-#   metadata/enodes.yaml           execution layer, enode:// URLs
-#   metadata/bootstrap_nodes.yaml  consensus layer, ENRs
-#
-# Either file may be absent - sandbox1 publishes no execution-layer bootnodes -
-# and an absent file is skipped, not failed. What is listed must be well-formed,
-# unique, and answer on the port it advertises.
+# Check the published bootnodes: enodes.yaml (execution, enode:// URLs) and
+# bootstrap_nodes.yaml (consensus, ENRs). A missing file is skipped, not failed.
+# What is listed must be well-formed, unique, and answer where it advertises.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -53,8 +49,8 @@ if [ ! -f "$ENRS" ]; then
   exit $fail
 fi
 
-# An ENR is base64url over RLP: [signature, seq, k1, v1, ...] with keys sorted.
-# Pull out ip and tcp so the endpoint can actually be dialled.
+# An ENR is base64url over RLP: [signature, seq, k1, v1, ...]. Pull out the
+# address and key so the endpoint can be reached.
 decode_enr() {
   python3 - "$1" <<'PY'
 import base64, sys
@@ -123,8 +119,7 @@ while IFS= read -r enr; do
   esac
   seen="$seen $sig"
 
-  # A dedicated discv5 bootnode advertises udp only and has no eth2 entry;
-  # a full beacon node advertises both. Check whichever ports are claimed.
+  # A dedicated bootnode advertises udp only; a beacon node advertises both.
   if [ "$tcp" != "0" ]; then
     if nc -z -w "$TIMEOUT" "$ip" "$tcp" >/dev/null 2>&1; then
       ok "$ip:$tcp tcp reachable (enr ${sig}…)"
@@ -134,7 +129,7 @@ while IFS= read -r enr; do
   fi
 
   if [ "$udp" != "0" ]; then
-    # nc -zu proves nothing over UDP, so make the node answer instead.
+    # nc -zu proves nothing over UDP; make the node answer instead.
     if [ -z "$pub" ]; then
       bad "ENR has udp $udp but no secp256k1 key to probe with (${sig}…)"
     elif out="$("$ROOT/scripts/discv5_probe.py" "$ip" "$udp" "$pub" 2>&1)"; then

@@ -1,14 +1,8 @@
-# Execution-layer bootnodes (enode URLs) for sandbox1.
+# Execution-layer bootnodes for sandbox1. Supplied by the operators. A
+# different host from the consensus bootnode in ./bootstrap_nodes.yaml.
 #
-# Supplied by the network operators. The host is the same machine that runs the
-# consensus-layer bootnode in ./bootstrap_nodes.yaml, on the standard geth p2p
-# port.
-#
-# Note the weaker guarantee compared with the consensus side. For an ENR,
-# scripts/discv5_probe.py makes the node answer WHOAREYOU, which binds the key
-# in the record to whatever is listening. There is no equally cheap equivalent
-# here: proving this node id belongs to that address needs a full RLPx
-# handshake (ECIES over secp256k1 ECDH), so scripts/check_bootnodes.sh only
-# checks the URL is well formed and the port accepts TCP.
+# Weaker guarantee than the consensus side: proving this node id belongs to that
+# address needs a full RLPx handshake, so check_bootnodes.sh only checks the URL
+# is well formed and the port accepts TCP.
 
 - enode://45de9aa57415171599a0423dd97b435ace47fbb26a0cc102e79019ae817c5be1cb8dc85b3a3556e01076244fa9864e7aa3a96062fb182b9d351dd466c3fd2838@52.192.191.48:30303

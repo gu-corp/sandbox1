@@ -145,7 +145,7 @@ Both layers now publish a bootnode, supplied by the operators:
 [`metadata/enodes.yaml`](metadata/enodes.yaml) for execution and
 [`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) for consensus.
 The consensus one is a dedicated discv5 bootnode — udp only, no tcp and no
-`eth2` entry. Both live on the same host.
+`eth2` entry. The two are on different hosts.
 
 Its liveness is **proven, not assumed**. A TCP connect only shows a port is
 open, and discovery runs over UDP where a connect shows nothing at all: there is
