@@ -11,6 +11,6 @@
 # the key below belongs to whatever is listening at that address.
 # See scripts/discv5_probe.py; scripts/check_bootnodes.sh runs it, weekly in CI.
 #
-# The execution layer still publishes no bootnodes; there is no enodes.yaml.
+# The execution-layer counterpart is ./enodes.yaml.
 
 - enr:-IS4QCakrBsjaKzvjxZSQBvTjY-bBKUfRepSlxSMD0CFTIkWedXm4xEphdJDwni3E7lMC5d5-i81rLW5ua-SLNze_z4BgmlkgnY0gmlwhBK0diKJc2VjcDI1NmsxoQOMFCDvRSeGeAB9NmKQ0QZtpnbepHN5r7VWG7-iriDTA4N1ZHCCIyg

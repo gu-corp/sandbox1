@@ -66,6 +66,10 @@ blob_schedule:          # applies from cancun; prague repeats the same values
   base_fee_update_fraction: 1112826
 
 deposit_contract_address: 0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2
+deposit_contract_block: 31377725   # 2026-08-25T06:49:18Z, tx 0x070517ae…c58d.
+                                   # Created by an internal CREATE from factory
+                                   # 0x0a0fb3f2…bc34 at nonce 3; see README.
+deposit_contract_block_hash: 0xb169eee3a1869f34b30e9b40d7c7a22879c35d7d21e9d4d1b7592f380e05ff51
 
 # Genesis allocation
 alloc_summary:

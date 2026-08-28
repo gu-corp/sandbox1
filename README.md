@@ -116,11 +116,36 @@ its header and checks `genesis_time` and `genesis_validators_root` against the
 node, then checks every key in `config.yaml` against `/eth/v1/config/spec` and
 every fork epoch against `/eth/v1/config/fork_schedule`.
 
-Bootnodes are half resolved. The execution layer still publishes none, so there
-is no `metadata/enodes.yaml`. The consensus layer now has one, supplied by the
-operators and recorded in
-[`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) — a dedicated
-discv5 bootnode, advertising udp only, with no tcp and no `eth2` entry.
+The deposit contract's deployment block was **not** supplied; it was measured,
+and it took some care. The node keeps no archive state — `eth_getCode` at an old
+block returns `not supported` — so the usual binary search is out, and `debug_`
+and `trace_` are both disabled. The explorer names block `31377725` and creation
+transaction `0x070517ae…c58d`, and the node's own receipt for that transaction
+confirms the block and its hash.
+
+But that receipt's `contractAddress` is `0x0a0fb3f2…bc34`, a **factory**, not
+the deposit contract, and none of the transaction's logs come from the deposit
+address. The contract was created by an internal `CREATE`, which no public RPC
+on this node will show. So it was confirmed arithmetically instead: a contract
+address is `keccak256(rlp([creator, nonce]))[12:]`, and from that factory,
+
+```
+nonce 1 -> 0xb2ec4469…a9d9     nonce 3 -> 0xd7e2921f…c5f2   <- deposit contract
+nonce 2 -> 0xfAEf3b65…6b83d    nonce 4 -> 0x9C7962aE…fc31
+```
+
+Nonces 1, 2 and 4 are exactly three of the addresses that emitted logs in that
+transaction, according to the node's own receipt. Nonces are sequential, so the
+nonce-3 creation cannot have happened later than the nonce-4 one — the deposit
+contract was created in that transaction, in block `31377725`. Only the list of
+internal creations came from the explorer; everything load-bearing came from the
+node.
+
+Both layers now publish a bootnode, supplied by the operators:
+[`metadata/enodes.yaml`](metadata/enodes.yaml) for execution and
+[`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) for consensus.
+The consensus one is a dedicated discv5 bootnode — udp only, no tcp and no
+`eth2` entry. Both live on the same host.
 
 Its liveness is **proven, not assumed**. A TCP connect only shows a port is
 open, and discovery runs over UDP where a connect shows nothing at all: there is
@@ -132,6 +157,13 @@ that can unmask it — and it must answer `WHOAREYOU`. Getting that reply back
 binds the key in the record to whatever is actually listening. CI runs it
 weekly, so the node going away surfaces on its own.
 
+The execution-layer bootnode is held to a **weaker** standard, and it is worth
+knowing which is which. There is no cheap equivalent of the `WHOAREYOU` trick
+for devp2p: proving that node id belongs to that address needs a full RLPx
+handshake, ECIES over secp256k1 ECDH. So `enodes.yaml` is only checked for a
+well-formed URL and a port that accepts TCP — enough to catch rot, not enough
+to prove identity.
+
 ## Files
 
 | File | Contents |
@@ -140,9 +172,12 @@ weekly, so the node going away surfaces on its own.
 | [`metadata/genesis_details.yaml`](metadata/genesis_details.yaml) | Genesis hash, state root, clique params, fork blocks, provenance |
 | [`metadata/config.yaml`](metadata/config.yaml) | Consensus-layer (beacon chain) config |
 | [`metadata/genesis.ssz`](metadata/genesis.ssz) | Beacon chain genesis state. Feed to a consensus client. |
+| [`metadata/enodes.yaml`](metadata/enodes.yaml) | Execution-layer bootnode enode URLs |
 | [`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) | Consensus-layer bootnode ENRs |
 | [`scripts/discv5_probe.py`](scripts/discv5_probe.py) | Proves a discv5 node is alive by making it answer `WHOAREYOU` |
 | [`metadata/deposit_contract.txt`](metadata/deposit_contract.txt) | Deposit contract address |
+| [`metadata/deposit_contract_block.txt`](metadata/deposit_contract_block.txt) | Eth1 block the deposit contract was deployed in |
+| [`metadata/deposit_contract_block_hash.txt`](metadata/deposit_contract_block_hash.txt) | Hash of that block |
 | [`metadata/chain.json`](metadata/chain.json) | EIP-155 chain metadata — id, RPC endpoint, native currency, explorer |
 
 ## Endpoints
@@ -167,11 +202,12 @@ its own will not follow the head.
 ```bash
 geth init --datadir ~/.sandbox1 metadata/genesis.json
 geth --datadir ~/.sandbox1 --networkid 1456260212 --syncmode full \
-     --authrpc.jwtsecret ~/.sandbox1/jwt.hex
+     --authrpc.jwtsecret ~/.sandbox1/jwt.hex \
+     --bootnodes "$(sed -n 's/^-[[:space:]]*\(enode:\/\/[^[:space:]#]*\).*$/\1/p' metadata/enodes.yaml | paste -sd, -)"
 ```
 
-No `--bootnodes` value can be given: the execution layer publishes none. Peer
-with a known node directly in the meantime.
+`--networkid` must be passed explicitly: geth would otherwise default it to the
+genesis `chainId`, which is `1337`, not the `1456260212` this network uses.
 
 ### Consensus layer
 
