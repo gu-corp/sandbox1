@@ -87,8 +87,10 @@ for j in range(2, len(items) - 1, 2):
     kv[items[j].decode("ascii", "replace")] = items[j + 1]
 ip  = ".".join(str(x) for x in kv["ip"]) if "ip" in kv else ""
 tcp = int.from_bytes(kv.get("tcp", b"\x00\x00"), "big")
+udp = int.from_bytes(kv.get("udp", b"\x00\x00"), "big")
+pub = kv.get("secp256k1", b"").hex()
 sig = items[0].hex()[:16]
-print(f"{ip} {tcp} {sig}")
+print(f"{ip} {tcp} {udp} {pub} {sig}")
 PY
 }
 
@@ -105,10 +107,14 @@ while IFS= read -r enr; do
     bad "could not decode ENR: ${enr:0:40}…"
     continue
   fi
-  read -r ip tcp sig <<<"$parsed"
+  read -r ip tcp udp pub sig <<<"$parsed"
 
-  if [ -z "$ip" ] || [ "$tcp" = "0" ]; then
-    bad "ENR carries no ip/tcp: ${enr:0:40}…"
+  if [ -z "$ip" ]; then
+    bad "ENR carries no ip: ${enr:0:40}…"
+    continue
+  fi
+  if [ "$tcp" = "0" ] && [ "$udp" = "0" ]; then
+    bad "ENR carries neither tcp nor udp: ${enr:0:40}…"
     continue
   fi
 
@@ -117,10 +123,27 @@ while IFS= read -r enr; do
   esac
   seen="$seen $sig"
 
-  if nc -z -w "$TIMEOUT" "$ip" "$tcp" >/dev/null 2>&1; then
-    ok "$ip:$tcp reachable (enr ${sig}…)"
-  else
-    bad "$ip:$tcp unreachable (enr ${sig}…)"
+  # A dedicated discv5 bootnode advertises udp only and has no eth2 entry;
+  # a full beacon node advertises both. Check whichever ports are claimed.
+  if [ "$tcp" != "0" ]; then
+    if nc -z -w "$TIMEOUT" "$ip" "$tcp" >/dev/null 2>&1; then
+      ok "$ip:$tcp tcp reachable (enr ${sig}…)"
+    else
+      bad "$ip:$tcp tcp unreachable (enr ${sig}…)"
+    fi
+  fi
+
+  if [ "$udp" != "0" ]; then
+    # nc -zu proves nothing over UDP, so make the node answer instead.
+    if [ -z "$pub" ]; then
+      bad "ENR has udp $udp but no secp256k1 key to probe with (${sig}…)"
+    elif out="$("$ROOT/scripts/discv5_probe.py" "$ip" "$udp" "$pub" 2>&1)"; then
+      ok "$ip:$udp discv5 alive (enr ${sig}…)"
+      printf '%s\n' "$out"
+    else
+      bad "$ip:$udp no discv5 answer (enr ${sig}…)"
+      printf '%s\n' "$out"
+    fi
   fi
 done < <(sed -n 's/^-[[:space:]]*\(enr:[^[:space:]#]*\).*$/\1/p' "$ENRS")
 

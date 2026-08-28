@@ -116,14 +116,21 @@ its header and checks `genesis_time` and `genesis_validators_root` against the
 node, then checks every key in `config.yaml` against `/eth/v1/config/spec` and
 every fork epoch against `/eth/v1/config/fork_schedule`.
 
-Bootnodes are partly resolved. The execution layer still publishes none, so
-there is no `metadata/enodes.yaml`. For the consensus layer,
-`https://rpc-1.sandbox1.japanopenchain.org:3500` sits in front of at least seven
-beacon nodes and returns a different `/eth/v1/node/identity` per request — but
-**six of the seven advertise a p2p port that does not accept connections**. Only
-the one reachable ENR is listed in
-[`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml), as a bare IPv4
-that will rot when that node is replaced. CI dials it weekly.
+Bootnodes are half resolved. The execution layer still publishes none, so there
+is no `metadata/enodes.yaml`. The consensus layer now has one, supplied by the
+operators and recorded in
+[`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) — a dedicated
+discv5 bootnode, advertising udp only, with no tcp and no `eth2` entry.
+
+Its liveness is **proven, not assumed**. A TCP connect only shows a port is
+open, and discovery runs over UDP where a connect shows nothing at all: there is
+no handshake, so `nc -zu` reports success against a black hole. Instead
+[`scripts/discv5_probe.py`](scripts/discv5_probe.py) sends a real discv5 packet.
+The masking key of such a packet is the *recipient's* node id, which is
+keccak256 of the public key in the ENR, so only a node that agrees its id is
+that can unmask it — and it must answer `WHOAREYOU`. Getting that reply back
+binds the key in the record to whatever is actually listening. CI runs it
+weekly, so the node going away surfaces on its own.
 
 ## Files
 
@@ -134,6 +141,7 @@ that will rot when that node is replaced. CI dials it weekly.
 | [`metadata/config.yaml`](metadata/config.yaml) | Consensus-layer (beacon chain) config |
 | [`metadata/genesis.ssz`](metadata/genesis.ssz) | Beacon chain genesis state. Feed to a consensus client. |
 | [`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) | Consensus-layer bootnode ENRs |
+| [`scripts/discv5_probe.py`](scripts/discv5_probe.py) | Proves a discv5 node is alive by making it answer `WHOAREYOU` |
 | [`metadata/deposit_contract.txt`](metadata/deposit_contract.txt) | Deposit contract address |
 | [`metadata/chain.json`](metadata/chain.json) | EIP-155 chain metadata — id, RPC endpoint, native currency, explorer |
 
@@ -189,6 +197,10 @@ scripts/check_deposit_contract.sh  # deposit contract is deployed, ids match
 scripts/check_genesis_ssz.sh       # genesis.ssz and config.yaml match the beacon node
 scripts/check_bootnodes.sh         # published bootnodes are well-formed and answer
 ```
+
+`check_bootnodes.sh` dials TCP where an ENR advertises it and runs
+`discv5_probe.py` where it advertises UDP, so a udp-only bootnode is checked
+properly rather than skipped.
 
 ## License
 

@@ -1,17 +1,16 @@
 # Consensus-layer bootstrap nodes (ENRs) for sandbox1.
 #
-# Not an official list. These were read from a beacon node's own
-# /eth/v1/node/identity and kept only if their advertised TCP port answered.
+# Supplied by the network operators, not scraped. This is a dedicated discv5
+# bootnode: it advertises udp only, carries no tcp and no eth2 entry, and has
+# seq 1 -- the shape of a purpose-run bootnode rather than a beacon node that
+# happens to be reachable.
 #
-# https://rpc-1.sandbox1.japanopenchain.org:3500 sits in front of at least seven
-# beacon nodes and hands out a different identity per request. Six of the seven
-# advertise a p2p address whose port does not accept connections from outside,
-# so only the reachable one is listed here.
-#
-# The address is a bare IPv4, not a DNS name, so it will rot when the node is
-# replaced. scripts/check_bootnodes.sh tests it, and CI runs weekly so the rot
-# surfaces without anyone having to look.
+# Liveness is checked by making the node answer, not by dialling a port. The
+# masking key of a discv5 packet is the recipient's own node id, which is
+# keccak256 of the public key in this record, so a WHOAREYOU coming back proves
+# the key below belongs to whatever is listening at that address.
+# See scripts/discv5_probe.py; scripts/check_bootnodes.sh runs it, weekly in CI.
 #
 # The execution layer still publishes no bootnodes; there is no enodes.yaml.
 
-- enr:-N24QEyWhtIzx97vrHY9RSFhH154aXN-hLYaxKplMuDSrILxX_xpdwi1Qx-QgCJALaSoOKM7pE3K9R2Z5ID_4YZgKnQUh2F0dG5ldHOIAAwAAAAAAACGY2xpZW500YpMaWdodGhvdXNlhTcuMC4xhGV0aDKQZo7OagUABTn__________4JpZIJ2NIJpcIQ0wL8whHF1aWOCIymJc2VjcDI1NmsxoQPc05d70EyaRlclVlPvM0G9PI_hDcNiZloMoTkOBQr_OYhzeW5jbmV0cwCDdGNwgiMog3VkcIIjKA
+- enr:-IS4QCakrBsjaKzvjxZSQBvTjY-bBKUfRepSlxSMD0CFTIkWedXm4xEphdJDwni3E7lMC5d5-i81rLW5ua-SLNze_z4BgmlkgnY0gmlwhBK0diKJc2VjcDI1NmsxoQOMFCDvRSeGeAB9NmKQ0QZtpnbepHN5r7VWG7-iriDTA4N1ZHCCIyg
