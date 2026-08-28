@@ -47,7 +47,12 @@ GENESIS_DELAY: 6000
 
 # Forking
 # ---------------------------------------------------------------
-# Some forks are disabled for now:
+# Fork epochs are in units of 16 slots: PRESET_BASE gnosis sets SLOTS_PER_EPOCH
+# to 16, so one epoch is 16 * SECONDS_PER_SLOT = 80s, not 384s. Beacon genesis
+# was 1787676703 (2026-08-25T16:51:43Z) = the timestamp of the eth1 block
+# holding the 5th deposit, plus GENESIS_DELAY.
+#
+# Electra and later are disabled for now:
 #  - These may be re-assigned to another fork-version later
 #  - Temporarily set to max uint64 value: 2**64 - 1
 
@@ -58,11 +63,14 @@ ALTAIR_FORK_EPOCH: 5
 BELLATRIX_FORK_VERSION: 0x02000539
 BELLATRIX_FORK_EPOCH: 10
 # Capella
+# 2026-08-27T16:39:43Z — activated; matches shanghaiTime on the execution layer
+# (block 31419366, the first block carrying withdrawalsRoot).
 CAPELLA_FORK_VERSION: 0x03000539
 CAPELLA_FORK_EPOCH: 2151
 # Deneb
+# 2026-08-28T02:10:23Z — matches cancunTime on the execution layer.
 DENEB_FORK_VERSION: 0x04000539
-DENEB_FORK_EPOCH: 18446744073709551615
+DENEB_FORK_EPOCH: 2579
 # Electra
 ELECTRA_FORK_VERSION: 0x05000539
 ELECTRA_FORK_EPOCH: 18446744073709551615
