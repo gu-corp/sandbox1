@@ -27,8 +27,32 @@ and a real consensus-layer config.
 | First PoS block | `31418732`, 2026-08-27T15:46:33Z (`difficulty: 0x0`) |
 
 Total difficulty is frozen at `60103838` and every block since 31418732 carries
-difficulty 0. `CAPELLA_FORK_EPOCH` is set to `2151`; Deneb and later remain
-disabled (`2**64-1`).
+difficulty 0.
+
+### Fork schedule
+
+`PRESET_BASE: gnosis` sets `SLOTS_PER_EPOCH` to **16**, so one epoch is
+`16 * 5 = 80` seconds — not the 384s of the mainnet preset. Beacon genesis was
+`1787676703` (2026-08-25T16:51:43Z), the timestamp of the eth1 block carrying
+the 5th deposit plus `GENESIS_DELAY`.
+
+| Fork | Epoch | Activates | EL counterpart |
+|---|---|---|---|
+| Altair | `5` | 2026-08-25T16:58:23Z | — |
+| Bellatrix | `10` | 2026-08-25T17:02:23Z | merge at TTD, block 31418732 |
+| Capella | `2151` | 2026-08-27T16:39:43Z | `shanghaiTime` — block 31419366, first `withdrawalsRoot` |
+| Deneb | `2579` | 2026-08-28T02:10:23Z | `cancunTime` |
+
+Electra and later remain disabled (`2**64-1`).
+
+Both epochs were checked against the execution layer rather than assumed —
+`eth_config` on the node reports the same two activation timestamps:
+
+```bash
+curl -sS -X POST -H 'Content-Type: application/json' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"eth_config","params":[]}' \
+  https://rpc-1.sandbox1.japanopenchain.org:8545 | jq '{current:.result.current.activationTime, next:.result.next.activationTime}'
+```
 
 Re-check with:
 
