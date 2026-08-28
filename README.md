@@ -86,7 +86,6 @@ prague_time: 1787884303       # 2026-08-28T02:31:43Z, = ELECTRA_FORK_EPOCH 2595
 deposit_contract_address: 0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2
 ```
 
-
 ## How much of this is verified
 
 The header fields and the allocation in
