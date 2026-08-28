@@ -17,7 +17,24 @@
     },
     "muirGlacierBlock": 0,
     "berlinBlock": 12842808,
-    "londonBlock": 17553835
+    "londonBlock": 17553835,
+    "terminalTotalDifficulty": 60103838,
+    "shanghaiTime": 1787848783,
+    "cancunTime": 1787883023,
+    "blobSchedule": {
+      "cancun": {
+        "target": 1,
+        "max": 2,
+        "baseFeeUpdateFraction": 1112826
+      },
+      "prague": {
+        "target": 1,
+        "max": 2,
+        "baseFeeUpdateFraction": 1112826
+      }
+    },
+    "pragueTime": 1787884303,
+    "depositContractAddress": "0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2"
   },
   "nonce": "0x0",
   "timestamp": "0x5bfbe6b5",
