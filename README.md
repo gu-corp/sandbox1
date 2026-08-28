@@ -46,8 +46,9 @@ the 5th deposit plus `GENESIS_DELAY`.
 
 Fulu and later remain disabled (`2**64-1`).
 
-Both epochs were checked against the execution layer rather than assumed —
-`eth_config` on the node reports the same two activation timestamps:
+Each post-merge epoch was checked against the execution layer rather than
+assumed. `eth_config` on the node reports the current fork's activation
+timestamp (and the next, when one is scheduled — none is, as of Electra):
 
 ```bash
 curl -sS -X POST -H 'Content-Type: application/json' \

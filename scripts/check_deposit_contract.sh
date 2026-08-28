@@ -97,4 +97,13 @@ else
   bad "DEPOSIT_NETWORK_ID=$net_id but $rpc reports ${live_net:-none}"
 fi
 
+# chain.json carries the same two ids; it drifted once (networkId said 1337),
+# so it is compared against the node too.
+cj_net="$(jq -r '.networkId' "$META/chain.json")"
+if [ "$cj_net" = "$live_net" ]; then
+  ok "chain.json networkId $cj_net matches the node"
+else
+  bad "chain.json networkId=$cj_net but $rpc reports ${live_net:-none}"
+fi
+
 exit $fail

@@ -2,7 +2,7 @@
   "name": "Sandbox1",
   "chain": "SBX1",
   "chainId": 1337,
-  "networkId": 1337,
+  "networkId": 1456260212,
   "shortName": "sandbox1",
   "slip44": 1,
   "nativeCurrency": {
