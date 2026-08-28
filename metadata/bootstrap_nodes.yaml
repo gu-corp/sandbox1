@@ -1,0 +1,16 @@
+# Consensus-layer bootstrap nodes (ENRs) for sandbox1.
+#
+# Supplied by the network operators, not scraped. This is a dedicated discv5
+# bootnode: it advertises udp only, carries no tcp and no eth2 entry, and has
+# seq 1 -- the shape of a purpose-run bootnode rather than a beacon node that
+# happens to be reachable.
+#
+# Liveness is checked by making the node answer, not by dialling a port. The
+# masking key of a discv5 packet is the recipient's own node id, which is
+# keccak256 of the public key in this record, so a WHOAREYOU coming back proves
+# the key below belongs to whatever is listening at that address.
+# See scripts/discv5_probe.py; scripts/check_bootnodes.sh runs it, weekly in CI.
+#
+# The execution-layer counterpart is ./enodes.yaml.
+
+- enr:-IS4QCakrBsjaKzvjxZSQBvTjY-bBKUfRepSlxSMD0CFTIkWedXm4xEphdJDwni3E7lMC5d5-i81rLW5ua-SLNze_z4BgmlkgnY0gmlwhBK0diKJc2VjcDI1NmsxoQOMFCDvRSeGeAB9NmKQ0QZtpnbepHN5r7VWG7-iriDTA4N1ZHCCIyg

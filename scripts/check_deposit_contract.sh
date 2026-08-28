@@ -11,6 +11,7 @@ CONFIG="$META/config.yaml"
 fail=0
 ok()  { printf '  \033[32mOK\033[0m   %s\n' "$1"; }
 bad() { printf '  \033[31mFAIL\033[0m %s\n' "$1"; fail=1; }
+note(){ printf '  %-22s %s\n' "$1" "$2"; }
 
 # DEPOSIT_CONTRACT_ADDRESS is an unquoted hex literal, which a YAML parser turns
 # into an integer. Read the raw line instead so the checksummed form survives.
@@ -46,6 +47,40 @@ if [ -z "$code" ] || [ "$code" = "0x" ]; then
   bad "no contract deployed at $addr on $rpc"
 else
   ok "deposit contract deployed at $addr ($size bytes)"
+fi
+
+# The deployment block must be a real block, and its hash must be the one
+# recorded next to it. This is the block a consensus client starts its eth1
+# deposit scan from, so a wrong value here means missed deposits.
+blk_file="$META/deposit_contract_block.txt"
+hash_file="$META/deposit_contract_block_hash.txt"
+if [ -f "$blk_file" ] && [ -f "$hash_file" ]; then
+  dep_block="$(tr -d '[:space:]' < "$blk_file")"
+  dep_hash="$(tr -d '[:space:]' < "$hash_file")"
+  blk_hex="$(printf '0x%x' "$dep_block")"
+  live_blk="$(rpc_call "$rpc" eth_getBlockByNumber "[\"$blk_hex\",false]" | jq -r '.result.hash // empty')"
+
+  if [ -z "$live_blk" ]; then
+    bad "block $dep_block not found on $rpc"
+  elif [ "$live_blk" = "$dep_hash" ]; then
+    ok "deposit contract block $dep_block has hash $dep_hash"
+  else
+    bad "block $dep_block hashes to $live_blk, deposit_contract_block_hash.txt says $dep_hash"
+  fi
+
+  # The contract cannot predate the block it was deployed in: the first deposit
+  # log has to land at or after it.
+  topic=0x649bbc62d0e31342afea4e5cd82d4049e7e1ee912fc0889aa790803be39038c5
+  first_dep="$(rpc_call "$rpc" eth_getLogs \
+    "[{\"address\":\"$addr\",\"topics\":[\"$topic\"],\"fromBlock\":\"$blk_hex\",\"toBlock\":\"latest\"}]" \
+    | jq -r '.result | length')"
+  if [ "${first_dep:-0}" -gt 0 ] 2>/dev/null; then
+    ok "$first_dep deposits found at or after block $dep_block"
+  else
+    note "deposits" "none found from block $dep_block (range may be too wide for this node)"
+  fi
+else
+  note "skipped" "no deposit_contract_block.txt / _hash.txt"
 fi
 
 # ...and the ids in the config must be the ids that node reports.

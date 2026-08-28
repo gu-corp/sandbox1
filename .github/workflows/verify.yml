@@ -34,6 +34,16 @@ jobs:
       - name: Check deposit contract
         run: ./scripts/check_deposit_contract.sh
 
+  genesis-ssz:
+    name: genesis.ssz and config match the beacon node
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+      - name: Check genesis.ssz
+        run: ./scripts/check_genesis_ssz.sh
+
   lint:
     name: configs parse
     runs-on: ubuntu-latest
