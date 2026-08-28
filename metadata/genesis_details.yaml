@@ -40,6 +40,34 @@ forks:
   london: 17553835      # independently measured: first block carrying
                         # baseFeePerGas; 17553834 has none, 17553835 has 0x3b9aca00
 
+# The merge. Total difficulty is frozen at the terminal value; every block from
+# 31418732 on carries difficulty 0.
+merge:
+  terminal_total_difficulty: 60103838
+  terminal_pow_block: 31418731   # difficulty 2, totalDifficulty 0x3951c9e
+  first_pos_block: 31418732      # 2026-08-27T15:46:33Z, difficulty 0x0
+
+# Post-merge forks activate on timestamp, not block number. Each one is the
+# execution-layer counterpart of a consensus-layer fork epoch in ./config.yaml;
+# the two must agree or the layers split. PRESET_BASE is gnosis, so an epoch is
+# 16 * 5 = 80s and beacon genesis is 1787676703.
+timestamp_forks:
+  shanghai: 1787848783  # 2026-08-27T16:39:43Z — CAPELLA_FORK_EPOCH 2151.
+                        # Measured: block 31419366, first with withdrawalsRoot.
+  cancun: 1787883023    # 2026-08-28T02:10:23Z — DENEB_FORK_EPOCH 2579.
+                        # Confirmed live: KZG precompile and blobSchedule active.
+  prague: 1787884303    # 2026-08-28T02:31:43Z — would be ELECTRA_FORK_EPOCH 2595,
+                        # but config.yaml still has ELECTRA_FORK_EPOCH disabled
+                        # (2**64-1) and the RPC node reports no next fork
+                        # scheduled. See README — unresolved.
+
+blob_schedule:          # applies from cancun; prague repeats the same values
+  target: 1
+  max: 2
+  base_fee_update_fraction: 1112826
+
+deposit_contract_address: 0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2
+
 # Genesis allocation
 alloc_summary:
   precompile_placeholders: 256          # 0x00..0x00 through 0x00..0xff, 1 wei each
