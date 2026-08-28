@@ -1,0 +1,25 @@
+{
+  "name": "Sandbox1",
+  "chain": "SBX1",
+  "chainId": 1337,
+  "networkId": 1337,
+  "shortName": "sandbox1",
+  "slip44": 1,
+  "nativeCurrency": {
+    "name": "Sandbox1 Token",
+    "symbol": "SBX1",
+    "decimals": 18
+  },
+  "rpc": [
+    "https://rpc-1.sandbox1.japanopenchain.org:8545"
+  ],
+  "faucets": [],
+  "explorers": [
+    {
+      "name": "Sandbox1 Blockchain Explorer",
+      "url": "https://rpc-1.sandbox1.japanopenchain.org",
+      "standard": "EIP3091"
+    }
+  ],
+  "infoURL": "https://www.japanopenchain.org/"
+}

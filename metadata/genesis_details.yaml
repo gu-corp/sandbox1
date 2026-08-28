@@ -1,0 +1,68 @@
+# sandbox1 — execution-layer genesis, as produced by ./genesis.json
+# Verified against https://rpc-1.sandbox1.japanopenchain.org:8545
+# (eth_getBlockByNumber 0x0) on 2026-08-25.
+# Reproduce with ../scripts/verify_genesis.sh
+
+chain_id: 1337
+network_id: 1456260212  # NOTE: intentionally differs from chain_id; geth needs --networkid 1456260212
+consensus: clique
+
+genesis_hash: 0xb9f3edbea733300355a191e5f7fa9e39603abddd8a31bc63d6bbb1987d36ca3f
+genesis_state_root: 0xc821f27902b258391f993d2953ab4956fb51ff3ba3be06e7a49f27611512a39e
+genesis_parent_hash: 0x0000000000000000000000000000000000000000000000000000000000000000
+
+genesis_time: 1543235253  # 2018-11-26T12:27:33Z — same genesis timestamp as joc and joct
+gas_limit: 470000000      # 0x1c03a180
+difficulty: 1
+nonce: 0x0000000000000000
+mix_hash: 0x0000000000000000000000000000000000000000000000000000000000000000
+coinbase: 0x0000000000000000000000000000000000000000
+
+clique:
+  period: 5      # confirmed; also measured at 5.003s average over blocks 1..31380175
+  epoch: 30000
+  # Initial signer set, encoded in genesis extraData
+  genesis_signers:
+    - 0xba82df33044b90a6d76591aef9fb4870d6b53c20
+
+# Fork activation blocks
+forks:
+  homestead: 0
+  eip150: 0
+  eip155: 0
+  eip158: 0
+  byzantium: 0
+  constantinople: 0
+  petersburg: 0
+  istanbul: 0
+  muir_glacier: 0
+  berlin: 12842808      # NOT equal to london — unlike joc and joct
+  london: 17553835      # independently measured: first block carrying
+                        # baseFeePerGas; 17553834 has none, 17553835 has 0x3b9aca00
+
+# Genesis allocation
+alloc_summary:
+  precompile_placeholders: 256          # 0x00..0x00 through 0x00..0xff, 1 wei each
+  funded:
+    - address: 0x131b395794e487b564fd86f5872727fc44544d23
+      balance_wei: 1000000000000000000000000000  # 1,000,000,000 SBX1
+
+# Provenance
+# ---------------------------------------------------------------
+# The header fields and the allocation in ./genesis.json were reconstructed from
+# the live chain before an official file was available, then proven: CI runs
+# `geth init` on the file and it reproduces genesis_hash above. Because the
+# state root commits to the whole allocation, that is proof the allocation and
+# every header field are exactly right.
+#
+# The `config` block does NOT enter the genesis hash, so it could not be proven
+# the same way. It now comes from the authoritative sandbox1 genesis.json.
+#
+# Worth knowing, since it is the one thing the hash check would never have
+# caught: berlin is at 12842808, NOT at the same block as london. joc and joct
+# both activate berlin and london together, and following that convention gave
+# the wrong answer here.
+#
+# ./genesis.json carries both `MuirGlacierBlock` and `muirGlacierBlock`, as the
+# official file does. Go's JSON decoding is case-insensitive so the two map to
+# the same field and the duplicate is harmless; it is kept for fidelity.
