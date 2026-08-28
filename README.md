@@ -13,19 +13,30 @@ and a real consensus-layer config.
 
 ## Status
 
-The execution layer is live and producing blocks. **The beacon chain has not
-reached genesis.** As of 2026-08-25:
+**Merged.** The beacon chain reached genesis and the execution layer crossed
+`TERMINAL_TOTAL_DIFFICULTY` on 2026-08-27. As of 2026-08-28:
 
 | | |
 |---|---|
-| `MIN_GENESIS_TIME` | `1787652600` — 2026-08-25T10:10:00Z, already passed |
+| `MIN_GENESIS_TIME` | `1787652600` — 2026-08-25T10:10:00Z |
 | `MIN_GENESIS_ACTIVE_VALIDATOR_COUNT` | `5` |
-| Deposits in the contract | **0** (`get_deposit_count()` returns 0) |
-| `get_deposit_root()` | `0xd70a2347…7e5e` — the empty-tree root |
+| Deposits in the contract | **6** (`get_deposit_count()`) |
+| `get_deposit_root()` | `0xadc1fbd3…b400` |
+| `TERMINAL_TOTAL_DIFFICULTY` | `60103838` — reached |
+| Terminal PoW block | `31418731`, total difficulty `60103838` |
+| First PoS block | `31418732`, 2026-08-27T15:46:33Z (`difficulty: 0x0`) |
 
-Genesis triggers once both conditions hold, so it waits on 5 validators
-depositing. `TERMINAL_TOTAL_DIFFICULTY` is set to `2**64-1`, which is
-unreachable, so the merge will not trigger on difficulty as configured.
+Total difficulty is frozen at `60103838` and every block since 31418732 carries
+difficulty 0. `CAPELLA_FORK_EPOCH` is set to `2151`; Deneb and later remain
+disabled (`2**64-1`).
+
+Re-check with:
+
+```bash
+curl -sS -X POST -H 'Content-Type: application/json' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"eth_getBlockByNumber","params":["latest",false]}' \
+  https://rpc-1.sandbox1.japanopenchain.org:8545 | jq '.result | {number, difficulty, totalDifficulty}'
+```
 
 ## Genesis information
 

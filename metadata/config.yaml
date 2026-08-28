@@ -5,9 +5,10 @@
 # the values here are real: the
 # deposit contract below is deployed on sandbox1 and the fork epochs are set.
 #
-# The beacon chain has NOT reached genesis yet. MIN_GENESIS_TIME has passed but
-# the deposit contract still holds 0 deposits, and MIN_GENESIS_ACTIVE_VALIDATOR_
-# COUNT is 5 — see the repo README.
+# The beacon chain is live and the merge is done: the deposit contract holds 6
+# deposits (>= MIN_GENESIS_ACTIVE_VALIDATOR_COUNT of 5) and the execution layer
+# crossed TERMINAL_TOTAL_DIFFICULTY at block 31418731 on 2026-08-27T15:46:33Z.
+# Block 31418732 is the first PoS block — see the repo README.
 #
 # The execution-layer counterpart lives in ./genesis.json.
 # =====================================================================
@@ -24,8 +25,9 @@ CONFIG_NAME: 'sandbox1'
 
 # Transition
 # ---------------------------------------------------------------
-# Set to max uint64: unreachable, so the merge never triggers on difficulty
-TERMINAL_TOTAL_DIFFICULTY: 18446744073709551615
+# Reached. This is the exact total difficulty of terminal PoW block 31418731;
+# block 31418732 (2026-08-27T15:46:33Z) is the first PoS block.
+TERMINAL_TOTAL_DIFFICULTY: 60103838
 # By default, don't use these params
 TERMINAL_BLOCK_HASH: 0x0000000000000000000000000000000000000000000000000000000000000000
 TERMINAL_BLOCK_HASH_ACTIVATION_EPOCH: 18446744073709551615
@@ -57,7 +59,7 @@ BELLATRIX_FORK_VERSION: 0x02000539
 BELLATRIX_FORK_EPOCH: 10
 # Capella
 CAPELLA_FORK_VERSION: 0x03000539
-CAPELLA_FORK_EPOCH: 18446744073709551615
+CAPELLA_FORK_EPOCH: 2151
 # Deneb
 DENEB_FORK_VERSION: 0x04000539
 DENEB_FORK_EPOCH: 18446744073709551615
