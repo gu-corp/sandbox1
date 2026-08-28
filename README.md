@@ -85,15 +85,19 @@ prague_time: 1787884303       # 2026-08-28T02:31:43Z — see the warning below
 deposit_contract_address: 0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2
 ```
 
-> **`pragueTime` has no consensus-layer counterpart.** `metadata/genesis.json`
-> schedules Prague for `1787884303`, which is beacon epoch **2595**, but
-> [`metadata/config.yaml`](metadata/config.yaml) still has
-> `ELECTRA_FORK_EPOCH: 18446744073709551615` — disabled. The RPC node also
-> reports no next fork scheduled after Cancun. An execution client following
-> this genesis file would fork at 02:31:43Z while its consensus client would
-> not. Either `ELECTRA_FORK_EPOCH` needs to be set to `2595`, or `pragueTime`
-> should not be here. Unresolved — confirm with the node operators before
-> running a node on this file.
+> **`ELECTRA_FORK_EPOCH` is missing from the consensus-layer config.**
+> `metadata/genesis.json` schedules Prague for `1787884303`, and the RPC node
+> confirms it: `eth_config` reported no fork after Cancun at 02:20Z, then
+> reported `next: 1787884303` by 02:29Z, so the operators rolled the Prague
+> config out in between. `1787884303` is beacon epoch **2595**.
+>
+> But [`metadata/config.yaml`](metadata/config.yaml) still has
+> `ELECTRA_FORK_EPOCH: 18446744073709551615` — disabled. Prague on the
+> execution layer is the counterpart of Electra on the consensus layer, so a
+> consensus client running this config will not follow the fork its execution
+> client just took. `ELECTRA_FORK_EPOCH` should be `2595`; that value is
+> derived here, not supplied by the operators, so confirm it before relying
+> on it.
 
 ## How much of this is verified
 
