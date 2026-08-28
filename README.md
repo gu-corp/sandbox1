@@ -42,8 +42,9 @@ the 5th deposit plus `GENESIS_DELAY`.
 | Bellatrix | `10` | 2026-08-25T17:02:23Z | merge at TTD, block 31418732 |
 | Capella | `2151` | 2026-08-27T16:39:43Z | `shanghaiTime` — block 31419366, first `withdrawalsRoot` |
 | Deneb | `2579` | 2026-08-28T02:10:23Z | `cancunTime` |
+| Electra | `2595` | 2026-08-28T02:31:43Z | `pragueTime` — forkId `0xb22f09bb` |
 
-Electra and later remain disabled (`2**64-1`).
+Fulu and later remain disabled (`2**64-1`).
 
 Both epochs were checked against the execution layer rather than assumed —
 `eth_config` on the node reports the same two activation timestamps:
@@ -81,19 +82,9 @@ london_block: 17553835
 terminal_total_difficulty: 60103838   # reached; first PoS block 31418732
 shanghai_time: 1787848783     # 2026-08-27T16:39:43Z, = CAPELLA_FORK_EPOCH 2151
 cancun_time: 1787883023       # 2026-08-28T02:10:23Z, = DENEB_FORK_EPOCH 2579
-prague_time: 1787884303       # 2026-08-28T02:31:43Z — see the warning below
+prague_time: 1787884303       # 2026-08-28T02:31:43Z, = ELECTRA_FORK_EPOCH 2595
 deposit_contract_address: 0xd7e2921Fe84Ffb29AD793F5E5f89C5C8A452c5F2
 ```
-
-> **`pragueTime` has no consensus-layer counterpart.** `metadata/genesis.json`
-> schedules Prague for `1787884303`, which is beacon epoch **2595**, but
-> [`metadata/config.yaml`](metadata/config.yaml) still has
-> `ELECTRA_FORK_EPOCH: 18446744073709551615` — disabled. The RPC node also
-> reports no next fork scheduled after Cancun. An execution client following
-> this genesis file would fork at 02:31:43Z while its consensus client would
-> not. Either `ELECTRA_FORK_EPOCH` needs to be set to `2595`, or `pragueTime`
-> should not be here. Unresolved — confirm with the node operators before
-> running a node on this file.
 
 ## How much of this is verified
 

@@ -56,10 +56,9 @@ timestamp_forks:
                         # Measured: block 31419366, first with withdrawalsRoot.
   cancun: 1787883023    # 2026-08-28T02:10:23Z — DENEB_FORK_EPOCH 2579.
                         # Confirmed live: KZG precompile and blobSchedule active.
-  prague: 1787884303    # 2026-08-28T02:31:43Z — would be ELECTRA_FORK_EPOCH 2595,
-                        # but config.yaml still has ELECTRA_FORK_EPOCH disabled
-                        # (2**64-1) and the RPC node reports no next fork
-                        # scheduled. See README — unresolved.
+  prague: 1787884303    # 2026-08-28T02:31:43Z — ELECTRA_FORK_EPOCH 2595.
+                        # Activated; forkId 0xb22f09bb, Electra system
+                        # contracts live and blocks carry requestsHash.
 
 blob_schedule:          # applies from cancun; prague repeats the same values
   target: 1
