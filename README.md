@@ -107,8 +107,23 @@ in `config` has to come from the source of truth, never from a pattern.
 as the official file does. Go's JSON decoding is case-insensitive, so the two
 map to the same field and the duplicate is harmless; it is kept for fidelity.
 
-One thing remains unverified: **no bootnodes are published**, so there is no
-`metadata/enodes.yaml`.
+[`metadata/genesis.ssz`](metadata/genesis.ssz) is the beacon chain genesis
+state, taken from the beacon node's own `/eth/v2/debug/beacon/states/genesis`.
+It is not derived: the state could be rebuilt from the deposits on the eth1
+chain, but that is exactly the kind of reconstruction the `berlinBlock` lesson
+warns against, so it comes from the node. `scripts/check_genesis_ssz.sh` decodes
+its header and checks `genesis_time` and `genesis_validators_root` against the
+node, then checks every key in `config.yaml` against `/eth/v1/config/spec` and
+every fork epoch against `/eth/v1/config/fork_schedule`.
+
+Bootnodes are partly resolved. The execution layer still publishes none, so
+there is no `metadata/enodes.yaml`. For the consensus layer,
+`https://rpc-1.sandbox1.japanopenchain.org:3500` sits in front of at least seven
+beacon nodes and returns a different `/eth/v1/node/identity` per request — but
+**six of the seven advertise a p2p port that does not accept connections**. Only
+the one reachable ENR is listed in
+[`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml), as a bare IPv4
+that will rot when that node is replaced. CI dials it weekly.
 
 ## Files
 
@@ -117,6 +132,8 @@ One thing remains unverified: **no bootnodes are published**, so there is no
 | [`metadata/genesis.json`](metadata/genesis.json) | Execution-layer genesis. Feed to `geth init`. |
 | [`metadata/genesis_details.yaml`](metadata/genesis_details.yaml) | Genesis hash, state root, clique params, fork blocks, provenance |
 | [`metadata/config.yaml`](metadata/config.yaml) | Consensus-layer (beacon chain) config |
+| [`metadata/genesis.ssz`](metadata/genesis.ssz) | Beacon chain genesis state. Feed to a consensus client. |
+| [`metadata/bootstrap_nodes.yaml`](metadata/bootstrap_nodes.yaml) | Consensus-layer bootnode ENRs |
 | [`metadata/deposit_contract.txt`](metadata/deposit_contract.txt) | Deposit contract address |
 | [`metadata/chain.json`](metadata/chain.json) | EIP-155 chain metadata — id, RPC endpoint, native currency, explorer |
 
@@ -124,7 +141,8 @@ One thing remains unverified: **no bootnodes are published**, so there is no
 
 | | |
 |---|---|
-| RPC | `https://rpc-1.sandbox1.japanopenchain.org:8545` |
+| Execution RPC | `https://rpc-1.sandbox1.japanopenchain.org:8545` |
+| Beacon API | `https://rpc-1.sandbox1.japanopenchain.org:3500` (Lighthouse; load-balanced across several nodes) |
 | Explorer | https://rpc-1.sandbox1.japanopenchain.org (Blockscout, same host, port 443) |
 
 The endpoint documented in `gu-corp/gu-sandbox-chain-docs` and in
@@ -133,16 +151,44 @@ with chain ID 99999 — does not resolve. Both should be updated.
 
 ## Run a node
 
+Both layers are required — the chain is post-merge, so an execution client on
+its own will not follow the head.
+
+### Execution layer
+
 ```bash
 geth init --datadir ~/.sandbox1 metadata/genesis.json
-geth --datadir ~/.sandbox1 --networkid 1456260212 --syncmode full
+geth --datadir ~/.sandbox1 --networkid 1456260212 --syncmode full \
+     --authrpc.jwtsecret ~/.sandbox1/jwt.hex
 ```
 
-No `--bootnodes` value can be given until bootnodes are published; peer with a
-known node directly in the meantime.
+No `--bootnodes` value can be given: the execution layer publishes none. Peer
+with a known node directly in the meantime.
 
-Verify the config matches the live chain with `scripts/verify_genesis.sh`
-and `scripts/check_deposit_contract.sh`.
+### Consensus layer
+
+`genesis.ssz` is not optional. `genesis_validators_root` feeds `ForkDigest`,
+which names every gossip topic, so a client without it cannot join at all.
+
+```bash
+lighthouse beacon_node \
+  --testnet-dir metadata \
+  --boot-nodes "$(sed -n 's/^-[[:space:]]*\(enr:[^[:space:]#]*\).*$/\1/p' metadata/bootstrap_nodes.yaml | paste -sd, -)" \
+  --execution-endpoint http://localhost:8551 \
+  --execution-jwt ~/.sandbox1/jwt.hex
+```
+
+`--testnet-dir metadata` picks up `config.yaml` and `genesis.ssz` from this
+repo. Other clients want the same two files under different flag names.
+
+### Verify
+
+```bash
+scripts/verify_genesis.sh          # geth init reproduces the genesis hash
+scripts/check_deposit_contract.sh  # deposit contract is deployed, ids match
+scripts/check_genesis_ssz.sh       # genesis.ssz and config.yaml match the beacon node
+scripts/check_bootnodes.sh         # published bootnodes are well-formed and answer
+```
 
 ## License
 
